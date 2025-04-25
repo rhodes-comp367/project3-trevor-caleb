@@ -39,6 +39,7 @@ data Path {A n} (l : LinkedList A n) (i : Fin n) : Fin n → Set where
     suc : ∀ {x j k} → Lookup l j (node x (just k)) → Path l i j → Path l i k
 
 data Circular {A n} : LinkedList A n → Set where
+    circle : ∀ {l i} → Path l i i → Circular l
 
 
 floyd : ∀ {A n} → (l : LinkedList A n) → Dec (Circular l)
