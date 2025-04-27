@@ -28,6 +28,7 @@ record Node (A : Set) (n : ℕ) : Set where
     field
         val : A
         next : Maybe (Fin n)
+
 -- given a set & a natural number to find,
 -- creates a length list of length N
 LinkedList : Set → ℕ → Set
@@ -54,7 +55,7 @@ stepNext n _  = {!   !}
 -- Base cases: 1. Slow == fast & they're not at the beginning, loop detected.
 -- 2. Slow or fast hits nothing, no loop
 -- 3. Move slow 1 & fast 2 steps.
-floydHelper : ∀ {A n} (l : LinkedList A n) → (slow fast : Fin n) → Dec (Circular l)
+floydHelper : ∀ {A n} (l : LinkedList A n) → Fin n → Fin n → Dec (Circular l)
 floydHelper l s f = {!   !}
 
 -- Floyd's cycle: more efficient way for proving a loop in a 
@@ -64,7 +65,9 @@ floydHelper l s f = {!   !}
 -- If there's a cycle, the nodes will eventually equal each other
 -- again. If not, the faster node will be Maybe nothing
 floyd : ∀ {A n} → (l : LinkedList A n) → Dec (Circular l)
-floyd l = {!   !} -- floyd l = {! floydHelper l zero zero !}
+floyd [] = {!   !}
+floyd (x ∷ []) = {!   !}
+floyd (x ∷ xs) = {!   !} -- floyd l = {! floydHelper l zero zero !}
 
 
 
