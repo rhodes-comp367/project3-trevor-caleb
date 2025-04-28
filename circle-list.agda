@@ -66,8 +66,8 @@ floydHelper l s f = {!   !}
 -- again. If not, the faster node will be Maybe nothing
 floyd : ∀ {A n} → (l : LinkedList A n) → Dec (Circular l)
 floyd [] = {!   !}
-floyd (x ∷ []) = {!   !}
-floyd (x ∷ xs) = {!   !} -- floyd l = {! floydHelper l zero zero !}
+-- floyd (x ∷ []) = {! no λ () !}
+floyd (x ∷ xs) = floydHelper (x ∷ xs) zero zero
 
 
 
