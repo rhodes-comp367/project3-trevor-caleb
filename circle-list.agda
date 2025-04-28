@@ -52,11 +52,16 @@ record Node (A : Set) (n : ℕ) : Set where
 LinkedList : Set → ℕ → Set
 LinkedList A n = Vec (Node A n) n
 
+
+
 -- finds a specific node in the LinkedList given Fin at 0
 data Lookup {A : Set} : ∀ {n} → Vec A n → Fin n → A → Set where
-    zero : ∀ {x xs} → Lookup (x ∷ xs) zero x
-    suc : ∀ {x xs k y} → Lookup xs k y → Lookup (x ∷ xs) (suc k) y
+    zero : ∀ {n x xs} → Lookup {n = suc n} (x ∷ xs) zero x
+    suc : ∀ {n x xs k y} → Lookup {n = n} xs k y → Lookup (x ∷ xs) (suc k) y
 -- 
+
+
+
 data Path {A n} (l : LinkedList A n) (i : Fin n) : Fin n → Set where
     one : ∀ {x j} → Lookup l i (node x (just j)) → Path l i j
     suc : ∀ {x j k} → Lookup l j (node x (just k)) → Path l i j → Path l i k
@@ -64,6 +69,15 @@ data Path {A n} (l : LinkedList A n) (i : Fin n) : Fin n → Set where
 data Circular {A n} : LinkedList A n → Set where
   circle : ∀ {l i} → Path l i i → Circular l
     -- circle : ∀ {l i} → Path l 0 i → Path l i i → Circular l
+
+-- data Length : Path l i j → Nat → Set
+
+-- record LongPath : LinkedList A n → Set
+
+-- circular-path : Circular l → LongPath l
+
+-- nothing-circular : Path l zero i → Lookup l i (node x nothing) → Circular l → ⊥
+-- nothing-circular = ?
 
 
 
@@ -73,7 +87,6 @@ stepNextHelp (node v n)= n
 -- Helper to step forward from one node to the next
 stepNext : ∀ {A n} → LinkedList A n → Fin n → Maybe (Fin n) 
 stepNext l F = stepNextHelp (lookup l F)
-
 
 -- A toNat function that accounts for the potential "nothing" in 
 --toNat : ∀ (Maybe (Fin n)) → ℕ
@@ -94,8 +107,8 @@ FloydEq xs i j _ = FloydNext xs (stepNext xs i) (stepNext xs j)
 -- FloydEq l _ _ _ nothing = ?
 -- FloydEq l 
 
-floydHelper' : ∀ {A n} l i j → Path l zero i → Path l i j → Dec (Circular l)
-floydHelper'  = {!   !}
+floydHelper' : ∀ {A n} → (l : LinkedList A (suc n)) → (i j : Fin (suc n)) → Path l zero i → Path l i j → Dec (Circular l)
+floydHelper' x y z = {!   !}
 
 -- Helper function using fin to represent the nodes of LinkedList
 -- slow moves 1 step at a time & fast moves 2 steps each time
@@ -119,8 +132,6 @@ floyd : ∀ {A n} → (l : LinkedList A n) → Dec (Circular l)
 floyd [] = no (λ {(circle {_} {()} _)})
 floyd ys@(node v n ∷ xs) = floydHelper ys (just zero) n 
 
-
-
 -- updateNext : {A : Set} → {n : ℕ} → Fin n → Vec (Node A n) n → Vec (Node A n) n
 -- updateNext _ [] = []
 -- updateNext _ ((node a _) ∷ []) = {!   !} -- (node a (just zero)) ∷ []
@@ -130,5 +141,4 @@ floyd ys@(node v n ∷ xs) = floydHelper ys (just zero) n
 -- append a [] = {! (Node a zero) ∷ [] !}
 -- append a (x ∷ []) = {!   !}
 -- append a (x ∷ xs) = {!   !}
-
   
