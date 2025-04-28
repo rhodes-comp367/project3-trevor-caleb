@@ -66,10 +66,12 @@ data Path {A n} (l : LinkedList A n) (i : Fin n) : Fin n → Set where
     one : ∀ {x j} → Lookup l i (node x (just j)) → Path l i j
     suc : ∀ {x j k} → Lookup l j (node x (just k)) → Path l i j → Path l i k
 
-data Circular {A n} : LinkedList A n → Set where
-  circle : ∀ {l i} → Path l i i → Circular l
-    -- circle : ∀ {l i} → Path l 0 i → Path l i i → Circular l
+data Circular {A n} : LinkedList A (suc n) → Set where
+  circle : ∀ {l i} → Path l zero i → Path l i i → Circular l
+  -- circle : ∀ {l i} → Path l i i → Circular l
 
+
+-- These are ideas for potentially determining circularity
 -- data Length : Path l i j → Nat → Set
 
 -- record LongPath : LinkedList A n → Set
@@ -79,7 +81,7 @@ data Circular {A n} : LinkedList A n → Set where
 -- nothing-circular : Path l zero i → Lookup l i (node x nothing) → Circular l → ⊥
 -- nothing-circular = ?
 
-
+{-
 
 stepNextHelp : ∀ {A n} → Node A n → Maybe (Fin n)
 stepNextHelp (node v n)= n
@@ -107,8 +109,9 @@ FloydEq xs i j _ = FloydNext xs (stepNext xs i) (stepNext xs j)
 -- FloydEq l _ _ _ nothing = ?
 -- FloydEq l 
 
+{-# TERMINATING #-}
 floydHelper' : ∀ {A n} → (l : LinkedList A (suc n)) → (i j : Fin (suc n)) → Path l zero i → Path l i j → Dec (Circular l)
-floydHelper' x y z = {!   !}
+floydHelper' xs s f p0 pn = {! FloydEq xs s f (Compare s f) !}
 
 -- Helper function using fin to represent the nodes of LinkedList
 -- slow moves 1 step at a time & fast moves 2 steps each time
@@ -141,4 +144,4 @@ floyd ys@(node v n ∷ xs) = floydHelper ys (just zero) n
 -- append a [] = {! (Node a zero) ∷ [] !}
 -- append a (x ∷ []) = {!   !}
 -- append a (x ∷ xs) = {!   !}
-  
+-}
