@@ -3,6 +3,16 @@ open import Data.Maybe.Base
 open import Data.Nat.Base
 open import Data.Vec.Base
 
+-- We got this from Data.Fin.Base in stdlib. Would not import correctly,
+-- but code is at:
+-- https://agda.github.io/agda-stdlib/master/Data.Fin.Base.html
+data ordering {n : ℕ} : Fin n → Fin n → Set where
+  less    : ∀ greatest (least : Fin′ greatest) →
+            ordering (inject least) greatest
+  equal   : ∀ i → ordering i i
+  greater : ∀ greatest (least : Fin′ greatest) →
+            ordering greatest (inject least)
+
 
 -- empty type.
 data ⊥ : Set where
@@ -47,16 +57,34 @@ data Circular {A n} : LinkedList A n → Set where
     circle : ∀ {l i} → Path l i i → Circular l
 
 -- Helper to step forward from one node to the next
-stepNext : ∀ {A n} → LinkedList A n → Fin n → Maybe (Fin n)
-stepNext n _  = {!   !}
+-- stepNext : ∀ {A n} → LinkedList A n → Fin n → Maybe (Fin n)
+-- stepNext n _  = {!   !}
+-- A toNat function that accounts for the potential "nothing" in 
+--toNat : ∀ (Maybe (Fin n)) → ℕ
+--toNat nothing = λ ()
+--toNat zero = zero
+--toNat suc(zero) = (suc zero)
+
+
+-- FloydEq : ∀ {A n} (l : LinkedList A n) → Maybe (Fin n) → (i : ℕ) → Maybe (Fin n) → (j : ℕ) → ordering i j → Dec (Circular l)
+-- FloydEq = ?
+
+-- FloydEq : ∀ {A n} (l : LinkedList A n) → Maybe (Fin n) → ℕ → Maybe (Fin n) → ℕ → Dec (Circular l)
+-- FloydEq l nothing _ _ _= ?
+-- FloydEq l _ _ _ nothing = ?
+-- FloydEq l 
+
 
 -- Helper function using fin to represent the nodes of LinkedList
 -- slow moves 1 step at a time & fast moves 2 steps each time
 -- Base cases: 1. Slow == fast & they're not at the beginning, loop detected.
 -- 2. Slow or fast hits nothing, no loop
 -- 3. Move slow 1 & fast 2 steps.
-floydHelper : ∀ {A n} (l : LinkedList A n) → Fin n → Fin n → Dec (Circular l)
-floydHelper l s f = {!   !}
+floydHelper : ∀ {A n} (l : LinkedList A n) → Maybe (Fin n) → Maybe (Fin n) → Dec (Circular l)
+-- floydHelper l s f = {!   !}
+floydHelper xs nothing _ = {!   !}
+floydHelper xs _ nothing = {!   !}
+floydHelper xs O T = {!   !}
 
 -- Floyd's cycle: more efficient way for proving a loop in a 
 -- linked list. 
@@ -65,9 +93,9 @@ floydHelper l s f = {!   !}
 -- If there's a cycle, the nodes will eventually equal each other
 -- again. If not, the faster node will be Maybe nothing
 floyd : ∀ {A n} → (l : LinkedList A n) → Dec (Circular l)
-floyd [] = {!   !}
--- floyd (x ∷ []) = {! no λ () !}
-floyd (x ∷ xs) = floydHelper (x ∷ xs) zero zero
+-- floyd [] = no (λ {(circle ())})
+floyd [] = no {! (λ {(circle ())}) !}
+floyd ys@(node v n ∷ xs) = floydHelper ys (just zero) n 
 
 
 
@@ -81,4 +109,4 @@ floyd (x ∷ xs) = floydHelper (x ∷ xs) zero zero
 -- append a (x ∷ []) = {!   !}
 -- append a (x ∷ xs) = {!   !}
 
- 
+  
