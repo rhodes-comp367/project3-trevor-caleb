@@ -82,7 +82,7 @@ stepNext l F = stepNextHelp (lookup l F)
 
 FloydNext : ∀ {A n} (l : LinkedList A n) → Maybe (Fin n) → Maybe (Fin n) → Dec (Circular l)
 FloydNext _ _ nothing = no {!   !}
-FloydNext xs i (just j) = {!   !}
+FloydNext xs i (just j) = {!  floydHelper !}
 
 FloydEq : ∀ {A n} (l : LinkedList A n) → (i : Fin n) → (j : Fin n) → ordering i j → Dec (Circular l)
 FloydEq xs i _ (equal _) = yes (circle (one {!   !}))
