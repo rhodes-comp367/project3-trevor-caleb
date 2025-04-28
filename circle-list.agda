@@ -62,7 +62,8 @@ data Path {A n} (l : LinkedList A n) (i : Fin n) : Fin n → Set where
     suc : ∀ {x j k} → Lookup l j (node x (just k)) → Path l i j → Path l i k
 
 data Circular {A n} : LinkedList A n → Set where
-    circle : ∀ {l i} → Path l i i → Circular l
+  circle : ∀ {l i} → Path l i i → Circular l
+    -- circle : ∀ {l i} → Path l 0 i → Path l i i → Circular l
 
 
 
@@ -81,7 +82,7 @@ stepNext l F = stepNextHelp (lookup l F)
 --toNat suc(zero) = (suc zero)
 
 FloydNext : ∀ {A n} (l : LinkedList A n) → Maybe (Fin n) → Maybe (Fin n) → Dec (Circular l)
-FloydNext _ _ nothing = no {!   !}
+FloydNext l _ nothing = no {! (λ {(circle ())}) !} -- ((λ {circle ()}))
 FloydNext xs i (just j) = {!  floydHelper !}
 
 FloydEq : ∀ {A n} (l : LinkedList A n) → (i : Fin n) → (j : Fin n) → ordering i j → Dec (Circular l)
@@ -93,6 +94,8 @@ FloydEq xs i j _ = FloydNext xs (stepNext xs i) (stepNext xs j)
 -- FloydEq l _ _ _ nothing = ?
 -- FloydEq l 
 
+floydHelper' : ∀ {A n} l i j → Path l zero i → Path l i j → Dec (Circular l)
+floydHelper'  = {!   !}
 
 -- Helper function using fin to represent the nodes of LinkedList
 -- slow moves 1 step at a time & fast moves 2 steps each time
@@ -101,7 +104,7 @@ FloydEq xs i j _ = FloydNext xs (stepNext xs i) (stepNext xs j)
 -- 3. Move slow 1 & fast 2 steps.
 floydHelper : ∀ {A n} (l : LinkedList A n) → Maybe (Fin n) → Maybe (Fin n) → Dec (Circular l)
 -- floydHelper l s f = {!   !}
-floydHelper xs nothing _ = no {!   !}
+floydHelper xs nothing _ = no {! λ () !}
 floydHelper xs _ nothing = no {!   !}
 floydHelper xs (just O) (just T) = FloydEq xs O T (Compare O T)
 
@@ -113,7 +116,7 @@ floydHelper xs (just O) (just T) = FloydEq xs O T (Compare O T)
 -- again. If not, the faster node will be Maybe nothing
 floyd : ∀ {A n} → (l : LinkedList A n) → Dec (Circular l)
 -- floyd [] = no (λ {(circle ())})
-floyd [] = no {! (λ {(circle ())}) !}
+floyd [] = no (λ {(circle {_} {()} _)})
 floyd ys@(node v n ∷ xs) = floydHelper ys (just zero) n 
 
 
