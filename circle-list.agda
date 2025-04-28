@@ -13,6 +13,14 @@ data ordering {n : ℕ} : Fin n → Fin n → Set where
   greater : ∀ greatest (least : Fin′ greatest) →
             ordering greatest (inject least)
 
+Compare : ∀ {n} (i j : Fin n) → ordering i j
+Compare zero    zero    = equal   zero
+Compare zero    (suc j) = less    (suc j) zero
+Compare (suc i) zero    = greater (suc i) zero
+Compare (suc i) (suc j) with Compare i j
+... | less    greatest least = less    (suc greatest) (suc least)
+... | greater greatest least = greater (suc greatest) (suc least)
+... | equal   i              = equal   (suc i)
 
 -- empty type.
 data ⊥ : Set where
@@ -56,18 +64,29 @@ data Path {A n} (l : LinkedList A n) (i : Fin n) : Fin n → Set where
 data Circular {A n} : LinkedList A n → Set where
     circle : ∀ {l i} → Path l i i → Circular l
 
+
+
+stepNextHelp : ∀ {A n} → Node A n → Maybe (Fin n)
+stepNextHelp (node v n)= n
+
 -- Helper to step forward from one node to the next
--- stepNext : ∀ {A n} → LinkedList A n → Fin n → Maybe (Fin n)
--- stepNext n _  = {!   !}
+stepNext : ∀ {A n} → LinkedList A n → Fin n → Maybe (Fin n) 
+stepNext l F = stepNextHelp (lookup l F)
+
+
 -- A toNat function that accounts for the potential "nothing" in 
 --toNat : ∀ (Maybe (Fin n)) → ℕ
 --toNat nothing = λ ()
 --toNat zero = zero
 --toNat suc(zero) = (suc zero)
 
+FloydNext : ∀ {A n} (l : LinkedList A n) → Maybe (Fin n) → Maybe (Fin n) → Dec (Circular l)
+FloydNext _ _ nothing = no {!   !}
+FloydNext xs i (just j) = {!   !}
 
--- FloydEq : ∀ {A n} (l : LinkedList A n) → Maybe (Fin n) → (i : ℕ) → Maybe (Fin n) → (j : ℕ) → ordering i j → Dec (Circular l)
--- FloydEq = ?
+FloydEq : ∀ {A n} (l : LinkedList A n) → (i : Fin n) → (j : Fin n) → ordering i j → Dec (Circular l)
+FloydEq xs i _ (equal _) = yes (circle (one {!   !}))
+FloydEq xs i j _ = FloydNext xs (stepNext xs i) (stepNext xs j)
 
 -- FloydEq : ∀ {A n} (l : LinkedList A n) → Maybe (Fin n) → ℕ → Maybe (Fin n) → ℕ → Dec (Circular l)
 -- FloydEq l nothing _ _ _= ?
@@ -82,9 +101,9 @@ data Circular {A n} : LinkedList A n → Set where
 -- 3. Move slow 1 & fast 2 steps.
 floydHelper : ∀ {A n} (l : LinkedList A n) → Maybe (Fin n) → Maybe (Fin n) → Dec (Circular l)
 -- floydHelper l s f = {!   !}
-floydHelper xs nothing _ = {!   !}
-floydHelper xs _ nothing = {!   !}
-floydHelper xs O T = {!   !}
+floydHelper xs nothing _ = no {!   !}
+floydHelper xs _ nothing = no {!   !}
+floydHelper xs (just O) (just T) = FloydEq xs O T (Compare O T)
 
 -- Floyd's cycle: more efficient way for proving a loop in a 
 -- linked list. 
