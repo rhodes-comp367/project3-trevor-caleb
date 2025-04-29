@@ -68,8 +68,34 @@ data Path {A n} (l : LinkedList A n) (i : Fin n) : Fin n → Set where
 
 data Circular {A n} : LinkedList A (suc n) → Set where
   circle : ∀ {l i} → Path l zero i → Path l i i → Circular l
-  -- circle : ∀ {l i} → Path l i i → Circular l
+  -- circle : ∀ {l i} → Path l
 
+
+-- The next 3 functions were to help use so the problem of absurdPaths.
+-- Essentially, if the dec was no, we can determine that it is absurd either
+-- due to the fast or slow node's next pointing to nothing.
+-- We had issues with defining the empty case without zero (suc n does not allow for zero,
+-- but it kept asking for it as one of the goals)
+
+
+-- contraDerive: if we can prove something is not true, it means
+-- that something else is true
+-- We used this somewhere in the last proofs project
+--contraDerive : ∀ {A : Set} → ⊥ → A
+--contraDerive ()
+
+-- getNodeByLookup : ∀ {A n} {l : LinkedList A n} {i : Fin n} {x : Node A n} → Lookup l i x → Node A n
+-- getNodeByLookup (zero {x = x} ) = x
+-- getNodeByLookup (suc {xs = xs} lookup) = ? -- getNodeByLookup lookup
+
+-- Try to define a path that is not possible so that we can fill in the no cases
+absurdPath : ∀ {A n} {l : LinkedList A (suc n)} {i : Fin (suc n)} → Path l zero i → ⊥
+
+--absurdPath (one lookup) with getNodeByLookup lookup
+--... | node v nothing = contraDerive -- 
+-- ... | just j = {!!} -- should not happen in this branch
+--absurdPath (suc lookup p) = absurdPath p
+absurdPath = {!   !}
 
 -- These are ideas for potentially determining circularity
 -- data Length : Path l i j → Nat → Set
@@ -125,6 +151,7 @@ stepNext l F = stepNextHelp (lookup l F)
 floydHelper' : ∀ {A n} → (l : LinkedList A (suc n)) → (i j : Fin (suc n)) → Path l zero i → Path l i j → Dec (Circular l)
 floydHelper' xs s f p0 pn = {! FloydEq xs s f (Compare s f) !}
 
+
 -- Floyd's cycle: more efficient way for proving a loop in a 
 -- linked list. 
 -- Assumes the list is not empty as we have to pass a successor to pattern match,
@@ -135,8 +162,9 @@ floydHelper' xs s f p0 pn = {! FloydEq xs s f (Compare s f) !}
 -- again. If not, the faster node will be Maybe nothing
 floyd : ∀ {A n} → (l : LinkedList A (suc n)) → Dec (Circular l)
 -- floyd [] = no (λ {(circle {_} {()} _)}) -- unnecessary case since it can not be null due to suc n setup
-floyd ys@(node v (just n) ∷ xs) = floydHelper' ys n {!   !} {!   !} {!   !} -- floydHelper' ys (just zero) n
-floyd ys@(node v (nothing) ∷ xs) = no {! (λ {(circle {_} {()} )} ) !}
+floyd ys@(node v (just n) ∷ xs) = floydHelper' ys zero n (one {!   !}) (suc {!   !} {!   !}) -- floydHelper' ys (just zero) n
+floyd ys@(node v (nothing) ∷ xs) = no ( λ { (circle p0 pn) → absurdPath p0}) -- (λ { (circle (one (zero ())) _) })
+
 -- updateNext : {A : Set} → {n : ℕ} → Fin n → Vec (Node A n) n → Vec (Node A n) n
 -- updateNext _ [] = []
 -- updateNext _ ((node a _) ∷ []) = {!   !} -- (node a (just zero)) ∷ []
