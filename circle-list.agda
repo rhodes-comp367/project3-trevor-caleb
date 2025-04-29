@@ -70,9 +70,36 @@ data Circular {A n} : LinkedList A (suc n) → Set where
   circle : ∀ {l i} → Path l zero i → Path l i i → Circular l
   -- circle : ∀ {l i} → Path l
 
+-- These are ideas for potentially determining circularity
+-- data Length : Path l i j → Nat → Set
+
+-- record LongPath : LinkedList A n → Set
+
+-- circular-path : Circular l → LongPath l
+
+-- nothing-circular : Path l zero i → Lookup l i (node x nothing) → Circular l → ⊥
+-- nothing-circular = ?
+
+-- A toNat function that accounts for the potential "nothing" in 
+--toNat : ∀ (Maybe (Fin n)) → ℕ
+--toNat nothing = λ ()
+--toNat zero = zero
+--toNat suc(zero) = (suc zero)
+
+-- Helper function using fin to represent the nodes of LinkedList
+-- slow moves 1 step at a time & fast moves 2 steps each time
+-- Base cases: 1. Slow == fast & they're not at the beginning, loop detected.
+-- 2. Slow or fast hits nothing, no loop
+-- 3. Move slow 1 & fast 2 steps.
+-- floydHelper : ∀ {A n} (l : LinkedList A n) → Maybe (Fin n) → Maybe (Fin n) → Dec (Circular l)
+-- floydHelper l s f = {!   !}
+-- floydHelper xs nothing _ = no {! λ () !}
+-- floydHelper xs _ nothing = no {!   !}
+-- floydHelper xs (just O) (just T) = FloydEq xs O T (Compare O T)
+
 
 -- The next 3 functions were to help use so the problem of absurdPaths.
--- Essentially, if the dec was no, we can determine that it is absurd either
+-- Essentially, if the decidability was no, we can determine that it is absurd either
 -- due to the fast or slow node's next pointing to nothing.
 -- We had issues with defining the empty case without zero (suc n does not allow for zero,
 -- but it kept asking for it as one of the goals)
@@ -97,18 +124,7 @@ absurdPath : ∀ {A n} {l : LinkedList A (suc n)} {i : Fin (suc n)} → Path l z
 --absurdPath (suc lookup p) = absurdPath p
 absurdPath = {!   !}
 
--- These are ideas for potentially determining circularity
--- data Length : Path l i j → Nat → Set
-
--- record LongPath : LinkedList A n → Set
-
--- circular-path : Circular l → LongPath l
-
--- nothing-circular : Path l zero i → Lookup l i (node x nothing) → Circular l → ⊥
--- nothing-circular = ?
-
-
-
+-- Helper to go to the next node
 stepNextHelp : ∀ {A n} → Node A n → Maybe (Fin n)
 stepNextHelp (node v n)= n
 
@@ -116,42 +132,42 @@ stepNextHelp (node v n)= n
 stepNext : ∀ {A n} → LinkedList A n → Fin n → Maybe (Fin n) 
 stepNext l F = stepNextHelp (lookup l F)
 
--- A toNat function that accounts for the potential "nothing" in 
---toNat : ∀ (Maybe (Fin n)) → ℕ
---toNat nothing = λ ()
---toNat zero = zero
---toNat suc(zero) = (suc zero)
+
+doubleStep : ∀ {A n} → LinkedList A n → Maybe (Fin n) → Maybe (Fin n)
+doubleStep _ nothing = nothing
+doubleStep l (just F) = stepNext l F
 
 -- FloydNext : ∀ {A n} (l : LinkedList A n) → Maybe (Fin n) → Maybe (Fin n) → Dec (Circular l)
--- FloydNext l _ nothing = no {! (λ {(circle ())}) !} -- ((λ {circle ()}))
--- FloydNext xs i (just j) = {!  floydHelper !}
+--FloydNext l _ nothing = no {! (λ {(circle ())}) !} -- ((λ {circle ()}))
+-- FloydNext xs i (just j) = ?
 
 -- FloydEq : ∀ {A n} (l : LinkedList A n) → (i : Fin n) → (j : Fin n) → ordering i j → Dec (Circular l)
 -- FloydEq xs i _ (equal _) = yes (circle (one {!   !}))
 -- FloydEq xs i j _ = FloydNext xs (stepNext xs i) (stepNext xs j)
 
--- FloydEq : ∀ {A n} (l : LinkedList A n) → Maybe (Fin n) → ℕ → Maybe (Fin n) → ℕ → Dec (Circular l)
--- FloydEq l nothing _ _ _= ?
--- FloydEq l _ _ _ nothing = ?
--- FloydEq l 
+-- Other method to determine equality between the two nodes
+--FloydEq' : ∀ {A n} (l : LinkedList A (suc n)) → (i j : Fin (suc n)) → ordering i j → Dec (Circular l)
+-- FloydEq' = {!   !} 
 
-
--- Helper function using fin to represent the nodes of LinkedList
--- slow moves 1 step at a time & fast moves 2 steps each time
--- Base cases: 1. Slow == fast & they're not at the beginning, loop detected.
--- 2. Slow or fast hits nothing, no loop
--- 3. Move slow 1 & fast 2 steps.
--- floydHelper : ∀ {A n} (l : LinkedList A n) → Maybe (Fin n) → Maybe (Fin n) → Dec (Circular l)
--- floydHelper l s f = {!   !}
--- floydHelper xs nothing _ = no {! λ () !}
--- floydHelper xs _ nothing = no {!   !}
--- floydHelper xs (just O) (just T) = FloydEq xs O T (Compare O T)
-
+-- Attempt at proof while holding information to decide, 2 Paths rather than 1
 {-# TERMINATING #-}
 floydHelper' : ∀ {A n} → (l : LinkedList A (suc n)) → (i j : Fin (suc n)) → Path l zero i → Path l i j → Dec (Circular l)
-floydHelper' xs s f p0 pn = {! FloydEq xs s f (Compare s f) !}
-
-
+-- floydHelper' xs s f p0 pn = {!   !} -- FloydEq' xs s f (Compare s f)
+-- This is what we were trying to do to reduce with the double paths method. We could get the base case of both equalling to work
+--floydHelper' l i j p0 pn with Compare i j | stepNext l i | doubleStep l (stepNext l j)
+--... | equal _ | _ | _  = yes (circle p0 pn)
+--... | less _ _ | nothing | _  = ?
+--... | less _ _ | (just i) | nothing = ?
+--... | less _ _ | (just i) | (just j) = ?
+--... | greater _ _ | nothing | _ = ?
+--... | greater _ _ | (just i) | nothing = ?
+-- ... | greater _ _ | (just i) | (just j) = ?
+-- This is the case that shows the equality case. We wrote functions to reduce, but they were not pattern
+-- matching correctly above for the goals.
+floydHelper' l i j p0 pn with Compare i j
+... | equal _ = yes (circle p0 pn)
+... | less _ _ = {!   !}
+... | greater _ _ = {!   !}
 -- Floyd's cycle: more efficient way for proving a loop in a 
 -- linked list. 
 -- Assumes the list is not empty as we have to pass a successor to pattern match,
@@ -162,9 +178,12 @@ floydHelper' xs s f p0 pn = {! FloydEq xs s f (Compare s f) !}
 -- again. If not, the faster node will be Maybe nothing
 floyd : ∀ {A n} → (l : LinkedList A (suc n)) → Dec (Circular l)
 -- floyd [] = no (λ {(circle {_} {()} _)}) -- unnecessary case since it can not be null due to suc n setup
-floyd ys@(node v (just n) ∷ xs) = floydHelper' ys zero n (one {!   !}) (suc {!   !} {!   !}) -- floydHelper' ys (just zero) n
+floyd ys@(node v (just n) ∷ xs) = floydHelper' ys zero n (one {!   !}) (suc (suc {! zero  !}) {!   !}) -- floydHelper' ys (just zero) n
 floyd ys@(node v (nothing) ∷ xs) = no ( λ { (circle p0 pn) → absurdPath p0}) -- (λ { (circle (one (zero ())) _) })
 
+
+-- These were functions we initially began to define but realized we didnt need, either not necessary
+-- or in standard library
 -- updateNext : {A : Set} → {n : ℕ} → Fin n → Vec (Node A n) n → Vec (Node A n) n
 -- updateNext _ [] = []
 -- updateNext _ ((node a _) ∷ []) = {!   !} -- (node a (just zero)) ∷ []
