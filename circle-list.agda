@@ -81,7 +81,7 @@ data Circular {A n} : LinkedList A (suc n) → Set where
 -- nothing-circular : Path l zero i → Lookup l i (node x nothing) → Circular l → ⊥
 -- nothing-circular = ?
 
-{-
+
 
 stepNextHelp : ∀ {A n} → Node A n → Maybe (Fin n)
 stepNextHelp (node v n)= n
@@ -96,44 +96,46 @@ stepNext l F = stepNextHelp (lookup l F)
 --toNat zero = zero
 --toNat suc(zero) = (suc zero)
 
-FloydNext : ∀ {A n} (l : LinkedList A n) → Maybe (Fin n) → Maybe (Fin n) → Dec (Circular l)
-FloydNext l _ nothing = no {! (λ {(circle ())}) !} -- ((λ {circle ()}))
-FloydNext xs i (just j) = {!  floydHelper !}
+-- FloydNext : ∀ {A n} (l : LinkedList A n) → Maybe (Fin n) → Maybe (Fin n) → Dec (Circular l)
+-- FloydNext l _ nothing = no {! (λ {(circle ())}) !} -- ((λ {circle ()}))
+-- FloydNext xs i (just j) = {!  floydHelper !}
 
-FloydEq : ∀ {A n} (l : LinkedList A n) → (i : Fin n) → (j : Fin n) → ordering i j → Dec (Circular l)
-FloydEq xs i _ (equal _) = yes (circle (one {!   !}))
-FloydEq xs i j _ = FloydNext xs (stepNext xs i) (stepNext xs j)
+-- FloydEq : ∀ {A n} (l : LinkedList A n) → (i : Fin n) → (j : Fin n) → ordering i j → Dec (Circular l)
+-- FloydEq xs i _ (equal _) = yes (circle (one {!   !}))
+-- FloydEq xs i j _ = FloydNext xs (stepNext xs i) (stepNext xs j)
 
 -- FloydEq : ∀ {A n} (l : LinkedList A n) → Maybe (Fin n) → ℕ → Maybe (Fin n) → ℕ → Dec (Circular l)
 -- FloydEq l nothing _ _ _= ?
 -- FloydEq l _ _ _ nothing = ?
 -- FloydEq l 
 
-{-# TERMINATING #-}
-floydHelper' : ∀ {A n} → (l : LinkedList A (suc n)) → (i j : Fin (suc n)) → Path l zero i → Path l i j → Dec (Circular l)
-floydHelper' xs s f p0 pn = {! FloydEq xs s f (Compare s f) !}
 
 -- Helper function using fin to represent the nodes of LinkedList
 -- slow moves 1 step at a time & fast moves 2 steps each time
 -- Base cases: 1. Slow == fast & they're not at the beginning, loop detected.
 -- 2. Slow or fast hits nothing, no loop
 -- 3. Move slow 1 & fast 2 steps.
-floydHelper : ∀ {A n} (l : LinkedList A n) → Maybe (Fin n) → Maybe (Fin n) → Dec (Circular l)
+-- floydHelper : ∀ {A n} (l : LinkedList A n) → Maybe (Fin n) → Maybe (Fin n) → Dec (Circular l)
 -- floydHelper l s f = {!   !}
-floydHelper xs nothing _ = no {! λ () !}
-floydHelper xs _ nothing = no {!   !}
-floydHelper xs (just O) (just T) = FloydEq xs O T (Compare O T)
+-- floydHelper xs nothing _ = no {! λ () !}
+-- floydHelper xs _ nothing = no {!   !}
+-- floydHelper xs (just O) (just T) = FloydEq xs O T (Compare O T)
+
+{-# TERMINATING #-}
+floydHelper' : ∀ {A n} → (l : LinkedList A (suc n)) → (i j : Fin (suc n)) → Path l zero i → Path l i j → Dec (Circular l)
+floydHelper' xs s f p0 pn = {! FloydEq xs s f (Compare s f) !}
 
 -- Floyd's cycle: more efficient way for proving a loop in a 
 -- linked list. 
+-- Assumes the list is not empty as we have to pass a successor to pattern match,
+-- else the two Paths in circular will throw an error "suc n != n"
 -- 2 nodes: 1 moves 2 nodes each iteration & another moves 
 -- 1 node each iteration.
 -- If there's a cycle, the nodes will eventually equal each other
 -- again. If not, the faster node will be Maybe nothing
-floyd : ∀ {A n} → (l : LinkedList A n) → Dec (Circular l)
--- floyd [] = no (λ {(circle ())})
-floyd [] = no (λ {(circle {_} {()} _)})
-floyd ys@(node v n ∷ xs) = floydHelper ys (just zero) n 
+floyd : ∀ {A n} → (l : LinkedList A (suc n)) → Dec (Circular l)
+-- floyd [] = no (λ {(circle {_} {()} _)}) -- unnecessary case since it can not be null due to suc n setup
+floyd ys@(node v n ∷ xs) = floydHelper' ys {!  !} {!   !} {!   !} {!   !} -- floydHelper' ys (just zero) n
 
 -- updateNext : {A : Set} → {n : ℕ} → Fin n → Vec (Node A n) n → Vec (Node A n) n
 -- updateNext _ [] = []
@@ -144,4 +146,3 @@ floyd ys@(node v n ∷ xs) = floydHelper ys (just zero) n
 -- append a [] = {! (Node a zero) ∷ [] !}
 -- append a (x ∷ []) = {!   !}
 -- append a (x ∷ xs) = {!   !}
--}
