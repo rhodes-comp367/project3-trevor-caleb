@@ -60,8 +60,8 @@ data Lookup {A : Set} : ∀ {n} → Vec A n → Fin n → A → Set where
     suc : ∀ {n x xs k y} → Lookup {n = n} xs k y → Lookup (x ∷ xs) (suc k) y
 -- 
 
-
-
+-- l: linked list to traverse
+-- i : next val to a node of linked list
 data Path {A n} (l : LinkedList A n) (i : Fin n) : Fin n → Set where
     one : ∀ {x j} → Lookup l i (node x (just j)) → Path l i j
     suc : ∀ {x j k} → Lookup l j (node x (just k)) → Path l i j → Path l i k
@@ -135,8 +135,8 @@ floydHelper' xs s f p0 pn = {! FloydEq xs s f (Compare s f) !}
 -- again. If not, the faster node will be Maybe nothing
 floyd : ∀ {A n} → (l : LinkedList A (suc n)) → Dec (Circular l)
 -- floyd [] = no (λ {(circle {_} {()} _)}) -- unnecessary case since it can not be null due to suc n setup
-floyd ys@(node v n ∷ xs) = floydHelper' ys {!  !} {!   !} {!   !} {!   !} -- floydHelper' ys (just zero) n
-
+floyd ys@(node v (just n) ∷ xs) = floydHelper' ys n {!   !} {!   !} {!   !} -- floydHelper' ys (just zero) n
+floyd ys@(node v (nothing) ∷ xs) = no {! (λ {(circle {_} {()} )} ) !}
 -- updateNext : {A : Set} → {n : ℕ} → Fin n → Vec (Node A n) n → Vec (Node A n) n
 -- updateNext _ [] = []
 -- updateNext _ ((node a _) ∷ []) = {!   !} -- (node a (just zero)) ∷ []
